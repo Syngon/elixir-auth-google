@@ -114,6 +114,11 @@ defmodule ElixirAuthGoogle do
     generate_oauth_url(conn) <> "&#{params}"
   end
 
+  def generate_oauth_url(url, query) when is_map(query) and is_binary(url) do
+    query = URI.encode_query(query, :rfc3986)
+    generate_oauth_url(url) <> "&#{query}"
+  end
+
   def generate_oauth_url(conn, query) when is_map(query) do
     query = URI.encode_query(query, :rfc3986)
     generate_oauth_url(conn) <> "&#{query}"
@@ -190,12 +195,14 @@ defmodule ElixirAuthGoogle do
   end
 
   def google_client_id do
-    System.get_env("GOOGLE_CLIENT_ID") || Application.get_env(:elixir_auth_google, :client_id)
+    (System.get_env("GOOGLE_CLIENT_ID") || Application.get_env(:elixir_auth_google, :client_id))
+    |> String.replace("\r", "")
   end
 
   defp google_client_secret do
-    System.get_env("GOOGLE_CLIENT_SECRET") ||
-      Application.get_env(:elixir_auth_google, :client_secret)
+    (System.get_env("GOOGLE_CLIENT_SECRET") ||
+       Application.get_env(:elixir_auth_google, :client_secret))
+    |> String.replace("\r", "")
   end
 
   defp google_scope do
